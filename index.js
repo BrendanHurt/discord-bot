@@ -16,7 +16,6 @@ client.player = player; //find a better way to do this later
 
 client.commands = new Collection();
 client.interactions = new Collection();
-//client.config = config;
 client.embedMessage = undefined; //find a better way to do this later
 
 const commandHandler = require('./util/commandLoader')(client, client.commands, './commands');
@@ -60,13 +59,13 @@ player.on('connectionError', (queue, error) => {
     console.log(`[${queue.guild.name}] Error emitted from the connection: ${error.message}`);
 });
 
-player.on('trackStart', (queue, track) => {
-    queue.metadata.send(`🎶 | Started playing: **${track.title}**`);
-    /*if (!client.embedMessage) {
+player.on('trackStart', async (queue, track) => {
+    //queue.metadata.send(`🎶 | Started playing: **${track.title}**`);
+    if (!client.embedMessage) {
         client.embedMessage = await queue.metadata.send({embeds: [createPlayerEmbed(track)]});
     } else {
-        client.embedMessage.edit(createPlayerEmbed(track));
-    }*/
+        client.embedMessage.edit({embeds: [createPlayerEmbed(track)]});
+    }
 });
 player.on('trackEnd', (queue, track) => {
     queue.metadata.send(`✅ | ${track.title} finished playing!`);
