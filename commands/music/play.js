@@ -1,24 +1,36 @@
 const { QueryType } = require('discord-player');
-const { joinVoiceChannel } = require('@discordjs/voice');
 
 exports.name = 'play';
 
+/**
+ * Searches for and queues a track or playlist from a given query
+ * @param {Client} client The client application
+ * @param {Message} message The message that prompted this command
+ * @param {Array} args Arguments for making the query (only needed if 
+ * called by a non-slash command). 
+ *      Args[0]: string (query)
+ *      Args[1]: int (result_limit)
+ * @returns {Void}
+ * 
+ * @TODO Add input sanitization & validation
+ */
 exports.run = async (client, message, args) => {
     /////////////////////////////////////////////////////////////////////////
     //searching for a track
 
-    const query = args[0]; //change this later
-
     const player = client.player;
+    const query = (message.commandName) ? message.options.get("query").value : args[0];
+    let limit = (!message.commandName) ? args[1] : 
+            (message.options.get("result_limit") !== null) ? message.options.get("result_limit").value : undefined;
 
     const searchResult = await player.search(query, {
-        requestedBy: message.author.username,
+        requestedBy: (message.commandName) ? message.user : message.author.username,
         searchEngine: QueryType.AUTO
     })
     .catch(() => {console.log('error while searching for the given query')});
 
     if (!searchResult || !searchResult.tracks.length) {
-        return void message.channel.send({content: 'No results were found!'});
+        return void message.reply({content: 'No results were found!'});
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -27,22 +39,23 @@ exports.run = async (client, message, args) => {
         metadata: message.channel,
         leaveOnEnd: false
     });
-    try {
-        if (!queue.connection) await queue.connect(message.member.voice.channel);
-    } catch {
-        void player.deleteQueue(message.guildId);
-        return void message.channel.send({content: 'Could not join your voice channel!'});
+    if (!queue.connection) {
+        await queue.connect(message.member.voice.channel)
+            .catch((error) => {
+                console.error(error);
+                void player.deleteQueue(message.guildId);
+                return void message.reply({content: 'Could not join your voice channel!'});
+            });
     }
 
     /////////////////////////////////////////////////////////////////////////
     //adding the track, or tracks, to the queue
-
-    await message.channel.send({content: `⏱ | loading your ${searchResult.playlist ? "playlist" : "track"}...`});
     try {
         
         //queueEmpty has to be set here otherwise it'll be set to the new track
         const queueEmpty = queue.nowPlaying() === undefined;
-        const max = (args[1] !== undefined) ? args[1] : searchResult.length;
+
+        if (!limit || limit > searchResult.tracks.length) { limit = searchResult.tracks.length; }
 
         if (searchResult.playlist) {
             for (let i = 0; i < max; i++) {
@@ -55,8 +68,10 @@ exports.run = async (client, message, args) => {
 
         if (queueEmpty) {await queue.play();}
 
+        message.reply({content: `⏱ | loading your ${searchResult.playlist ? "playlist" : "track"}...`});
+
     } catch (error) {
         console.error(error);
-        message.channel.send('Something went wrong while trying to queue the request');
+        message.reply('Something went wrong while trying to queue the request');
     }
 }
