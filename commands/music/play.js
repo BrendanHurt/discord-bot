@@ -19,8 +19,8 @@ exports.run = async (client, message, args) => {
     //searching for a track
 
     const player = client.player;
-    const query = (message.commandName) ? message.options.get("query").value : args[0];
-    let limit = (!message.commandName) ? args[1] : 
+    const query = (!message.commandName) ? args[0] : message.options.get("query").value;
+    let max = (!message.commandName) ? args[1] : 
             (message.options.get("result_limit") !== null) ? message.options.get("result_limit").value : undefined;
 
     const searchResult = await player.search(query, {
@@ -55,7 +55,7 @@ exports.run = async (client, message, args) => {
         //queueEmpty has to be set here otherwise it'll be set to the new track
         const queueEmpty = queue.nowPlaying() === undefined;
 
-        if (!limit || limit > searchResult.tracks.length) { limit = searchResult.tracks.length; }
+        if (!max || max > searchResult.tracks.length) { max = searchResult.tracks.length; }
 
         if (searchResult.playlist) {
             for (let i = 0; i < max; i++) {
