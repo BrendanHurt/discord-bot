@@ -1,7 +1,8 @@
 const channelChecksPass = require('../../util/voiceChannelChecks');
 
 exports.run = async (client, interaction) => {
-    await interaction.deferReply();
+    require("../../commands/music/remove_track").run(client, interaction);
+    /*await interaction.deferReply();
     if (channelChecksPass(interaction) !== true) {return;}
     
     const trackNumber = interaction.options.get("track_number").value - 1;
@@ -26,5 +27,5 @@ exports.run = async (client, interaction) => {
         return void interaction.followUp({
             content: `Something went wrong while trying to remove track number: ${trackNumber + 1} from the queue`
         });
-    }
+    }*/
 }

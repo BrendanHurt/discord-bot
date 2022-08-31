@@ -1,7 +1,8 @@
 const channelChecksPass = require('../../util/voiceChannelChecks');
 
 exports.run = async (client, interaction) => {
-    await interaction.deferReply();
+    require("../../commands/music/shuffle").run(client, interaction, null);
+    /*await interaction.deferReply();
     if (channelChecksPass(interaction) !== true) {return;}
     
     const queue = client.player.getQueue(interaction.guildId);
@@ -11,5 +12,5 @@ exports.run = async (client, interaction) => {
     }
 
     queue.shuffle();
-    return void interaction.followUp({content: '✅ | Queue has been shuffled!'});
+    return void interaction.followUp({content: '✅ | Queue has been shuffled!'});*/
 }

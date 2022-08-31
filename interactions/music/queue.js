@@ -17,9 +17,11 @@ exports.name = 'queue';
  * Could even try to use ephemeral messages to go up and down the queue?
  */
 
-//TODO: move the pagification to it's own function in util
+exports.run = (client, interaction) => {
+    require("../../commands/music/queue").run(client, interaction);
+}
 
-exports.run = async (client, interaction) => {
+/*exports.run = async (client, interaction) => {
     await interaction.deferReply({ephemeral: true});
     if (channelChecksPass(interaction) !== true) {return;}
     
@@ -60,4 +62,4 @@ exports.run = async (client, interaction) => {
         console.error(err);
         return void interaction.followUp({content: 'An error occured while getting the queue'});
     }
-}
+}*/

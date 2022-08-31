@@ -7,7 +7,8 @@ const channelChecksPass = require('../../util/voiceChannelChecks');
  * @returns {void Interaction.followUp()}   On failure, returns a failure message.
  */
 exports.run = async (client, interaction) => {
-    await interaction.deferReply();
+    require("../../commands/music/skip").run(client, interaction, null);
+    /*await interaction.deferReply();
     if (channelChecksPass(interaction) !== true) {return;}
     
     const queue = client.player.getQueue(interaction.guildId);
@@ -22,5 +23,5 @@ exports.run = async (client, interaction) => {
     
     return void interaction.followUp({
         content: success ? `✅ | Skipped **${currentTrack}!**` : `❌ | Something went wrong!`
-    });
+    });*/
 }
