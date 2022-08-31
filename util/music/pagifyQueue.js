@@ -24,8 +24,9 @@ module.exports = pagifyQueue = (queue) => {
         currPage += 'Queue is empty!';
     }
 
+    let position = 1;
     queue.tracks.forEach(track => {
-        let entry = `${track.title} (${track.duration})\n`;
+        let entry = `${position}: ${track.title} (${track.duration})\n`;
 
         //create a page if the message is too long
         if (currPage.length + entry.length >= 2000) {
@@ -33,6 +34,7 @@ module.exports = pagifyQueue = (queue) => {
             currPage = '';
         }
         currPage += entry;
+        position++;
     });
 
     //get the last (or only) page
