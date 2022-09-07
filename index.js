@@ -19,7 +19,7 @@ client.interactions = new Collection();
 client.embedMessage = undefined; //find a better way to do this later
 
 const commandHandler = require('./util/commandLoader')(client, client.commands, './commands');
-const interactionHandler = require('./util/commandLoader')(client, client.interactions, './interactions');
+const interactionHandler = require('./util/commandLoader')(client, client.interactions, './commands');
 const eventHandler = require('./util/eventHandler')(client);
 
 client.on('ready', () => {
@@ -60,23 +60,23 @@ player.on('connectionError', (queue, error) => {
 });
 
 player.on('trackStart', async (queue, track) => {
-    //queue.metadata.send(`🎶 | Started playing: **${track.title}**`);
-    if (!client.embedMessage) {
+    queue.metadata.send({embeds: [createPlayerEmbed(track)]});
+    /*if (!client.embedMessage) {
         client.embedMessage = await queue.metadata.send({embeds: [createPlayerEmbed(track)]});
     } else {
         client.embedMessage.edit({embeds: [createPlayerEmbed(track)]});
-    }
+    }*/
 });
 player.on('trackEnd', (queue, track) => {
     queue.metadata.send(`✅ | ${track.title} finished playing!`);
 });
 
-player.on('trackAdd', (queue, track) => {
+/*player.on('trackAdd', (queue, track) => {
     queue.metadata.send(`🎶 | Added **${track.title}** to the queue`);
 });
 player.on('tracksAdd', (queue, track) => {
     queue.metadata.send('Playlist added to the queue!');
-});
+});*/
 
 player.on('botDisconnect', (queue) => {
     queue.metadata.send(`❌ | Manually disconnected from the voice channel, clearing the queue!`);
