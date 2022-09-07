@@ -1,4 +1,3 @@
-//const { REST } = require("@discordjs/rest");
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { REST, Routes } = require("discord.js");
 const config = require("../../config.json");
@@ -24,6 +23,12 @@ exports.run = async (client, message, args) => {
                     .setDescription("The maximum number of tracks you want to add from a playlist")
             ),
         new SlashCommandBuilder()
+            .setName("pause")
+            .setDescription("Pauses the music player"),
+        new SlashCommandBuilder()
+            .setName("resume")
+            .setDescription("The player resumes playing music"),
+        new SlashCommandBuilder()
             .setName("queue")
             .setDescription("Displays the music queue"),
         new SlashCommandBuilder()
@@ -44,6 +49,8 @@ exports.run = async (client, message, args) => {
             .setName("stop")
             .setDescription("The bot stops playing music and leaves the voice channel")
     ].map(command => command.toJSON());
+
+    console.log(commands[1]);
     
     const rest = new REST({version: "10"}).setToken(client.token);
     try {
@@ -59,61 +66,3 @@ exports.run = async (client, message, args) => {
         await message.reply("Something went wrong!");
     }
 }
-
-/*exports.run = async (client, message, args) => {
-        await message.client.application.fetch();
-        if (message.author.id !== message.client.application.owner.id) { return; }
-
-        await message.guild.commands.set([
-            {
-                name: "play",
-                description: "Plays a song",
-                options: [
-                    {
-                        name: "query",
-                        type: "STRING",
-                        description: "The song you want to play",
-                        required: true
-                    },
-                    {
-                        name: "result_limit",
-                        type: "INTEGER",
-                        description: "The maximum number of results you want for this request",
-                        required: false
-                    }
-                ] 
-            },
-            {
-                name: "skip",
-                description: "Skip the current song"
-            },
-            {
-                name: "queue",
-                description: "Displays the queue of songs"
-            },
-            {
-                name: "stop",
-                description: "Stop playing music"
-            },
-            {
-                name: "current",
-                description: "Displays the currently playing song"
-            },
-            {
-                name: "remove_track",
-                description: "Removes the specified track from the queue (i.e. /remove_track 3 removes the third track)",
-                options: [{
-                    name: "track_number",
-                    type: "INTEGER",
-                    description: "The position of the song in the queue",
-                    required: true
-                }]
-            },
-            {
-                name: "shuffle",
-                description: "Shuffles the queue"
-            }
-        ]);
-
-    await message.reply("Slash commands are now enabled!");
-}*/
