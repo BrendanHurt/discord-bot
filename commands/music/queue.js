@@ -1,4 +1,47 @@
-const pagifyQueue = require('../../util/music/pagifyQueue');
+/**
+ * Creates an array of stings that hold the name and track length of all the tracks in
+ * the queue. Paginating is necessary to stay within the 2000 character limit of discord messages.
+ * 
+ * @param  {queue}  queue The queue holding the track names & durations to be pagified
+ * @return {string[]} The pages of the queue
+ * 
+ * @todo Consider removing the currently playing track from the message
+ * @todo Consider adding a limit so pages can be shorter if desired
+ */
+ function paginateQueue(queue) {
+    let pages = [];
+    let currPage = '';
+
+    //no music playing
+    if (!queue.playing) {
+        pages.push('❌ | No music is playing!');
+        return pages;
+    }
+
+    currPage = `🎶 | Now Playing:\n ${queue.nowPlaying().title} (${queue.nowPlaying().duration})\n⏱ | Queue:\n`;
+
+    if (queue.tracks.length === 0) {
+        currPage += 'Queue is empty!';
+    }
+
+    let position = 1;
+    queue.tracks.forEach(track => {
+        let entry = `${position}: ${track.title} (${track.duration})\n`;
+
+        //create a page if the message is too long
+        if (currPage.length + entry.length >= 2000) {
+            pages.push(currPage);
+            currPage = '';
+        }
+        currPage += entry;
+        position++;
+    });
+
+    //get the last (or only) page
+    pages.push(currPage);
+
+    return pages;
+}
 
 /**
  * Displays the currently playing track as well as all tracks in the queue,
@@ -7,18 +50,25 @@ const pagifyQueue = require('../../util/music/pagifyQueue');
  * @param {Message} message 
  * @returns {Void}
  */
-exports.run = (client, message) => {
+exports.run = async (client, message) => {
     const queue = client.player.getQueue(message.guildId);
-    if (!queue && queue.nowPlaying === undefined) {
+    const isInteraction = (message.commandName !== undefined);
+    if (isInteraction) { await message.deferReply(); }
+
+    if (!queue || !queue.playing) {
         return void message.reply({content: '❌ | Queue is empty!'});
     }
 
     try {
 
-        const pages = pagifyQueue(queue);
+        const pages = paginateQueue(queue);
 
         for (page of pages) {
-            void message.reply({content: page});
+            if (isInteraction) {
+                message.followUp({content: page});
+            } else {
+                message.reply({content: page});
+            }
         }
         return;
         
