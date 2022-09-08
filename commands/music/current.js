@@ -1,11 +1,14 @@
+const voiceChecks = require("../../util/music/validateVoiceChannel");
+const queueChecks = require("../../util/music/validateQueuePlaying");
+
 const { EmbedBuilder } = require("discord.js");
 exports.aliases = ['nowPlaying'];
 
 exports.run = (client, message, args) => {
     const queue = client.player.getQueue(message.guildId);
-    if (!queue || queue.nowPlaying() === undefined) {
-        return void message.reply({content: '❌ | Not playing music right now!'});
-    }
+    
+    if (voiceChecks(message, queue) === false) { return; }
+    if (queueChecks(message, queue) === false) { return; }
 
     const track = queue.nowPlaying();
 

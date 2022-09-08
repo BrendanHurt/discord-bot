@@ -1,12 +1,13 @@
-const voiceChannelChecks = require("../../util/music/voiceChannelChecks");
+const voiceChecks = require("../../util/music/validateVoiceChannel");
+const queueChecks = require("../../util/music/validateQueuePlaying");
 
 exports.name = "pause";
 
 exports.run = async (client, message, args) => {
     const queue = client.player.getQueue(message.guildId);
-    if (!queue || !queue.playing) {
-        return void message.reply({content: '❌ | No music is playing!'});
-    }
+
+    if (voiceChecks(message, queue) === false) { return; }
+    if (queueChecks(message, queue) === false) { return; }
 
     const success = queue.setPaused(true);
 

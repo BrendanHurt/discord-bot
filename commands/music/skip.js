@@ -1,11 +1,15 @@
+const voiceChecks = require("../../util/music/validateVoiceChannel");
+const queueChecks = require("../../util/music/validateQueuePlaying");
+
 exports.name = 'skip';
 
 exports.run = async (client, message, args) => {
     const queue = client.player.getQueue(message.guildId);
-    if (!queue || queue.nowPlaying() === undefined) {
-        return void message.reply({content: '❌ | No music is playing!'});
-    }
-    const currentTrack = queue.nowPlaying().title;
+    
+    if (voiceChecks(message, queue) === false) { return; }
+    if (queueChecks(message, queue) === false) { return; }
+
+    const currentTrack = queue.current;
     const success = queue.skip();
 
     return void message.reply({

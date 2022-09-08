@@ -1,3 +1,6 @@
+const voiceChecks = require("../../util/music/validateVoiceChannel");
+const queueChecks = require("../../util/music/validateQueuePlaying");
+
 /**
  * Creates an array of stings that hold the name and track length of all the tracks in
  * the queue. Paginating is necessary to stay within the 2000 character limit of discord messages.
@@ -53,11 +56,11 @@
 exports.run = async (client, message) => {
     const queue = client.player.getQueue(message.guildId);
     const isInteraction = (message.commandName !== undefined);
-    if (isInteraction) { await message.deferReply(); }
 
-    if (!queue || !queue.playing) {
-        return void message.reply({content: '❌ | Queue is empty!'});
-    }
+    if (voiceChecks(message, queue) === false) { return; }
+    if (queueChecks(message, queue) === false) { return; }
+
+    if (isInteraction) { await message.deferReply(); }
 
     try {
 
