@@ -1,5 +1,6 @@
 const { QueryType } = require('discord-player');
 const voiceChecks = require("../../util/music/validateVoiceChannel");
+const isInteraction = require("../../util/isInteraction");
 
 exports.name = 'play';
 
@@ -7,7 +8,7 @@ exports.name = 'play';
  * Searches for and queues a track or playlist from a given query
  * @param {Client} client The client application
  * @param {Message} message The message that prompted this command
- * @param {Array[query: string, result_limit: int]} args Arguments for making the query (only needed if 
+ * @param {{string: query, number: result_limit}} args Arguments for making the query (only needed if 
  *      called by a non-slash command).
  * @returns {Void}
  * 
@@ -20,11 +21,11 @@ exports.run = async (client, message, args) => {
     /////////////////////////////////////////////////////////////////////////
     //searching for a track
     const player = client.player;
-    const query = (!message.commandName) ? args[0] : message.options.get("query").value;
-    let max = (!message.commandName) ? args[1] : message.options.get("result_limit")?.value;
+    const query = (!isInteraction) ? args[0] : message.options.get("query").value;
+    let max = (!isInteraction) ? args[1] : message.options.get("result_limit")?.value;
 
     const searchResult = await player.search(query, {
-        requestedBy: (message.commandName) ? message.user : message.author.username,
+        requestedBy: (isInteraction) ? message.user : message.author.username,
         searchEngine: QueryType.AUTO
     })
     .catch(() => {console.log('error while searching for the given query')});
@@ -66,7 +67,7 @@ exports.run = async (client, message, args) => {
         if (!queue.playing) { 
             await queue.play()
                 .then()
-                .catch("wuh oh");
+                .catch(console.error);
         }
 
         message.reply({content: `⏱ | loading your ${searchResult.playlist ? "playlist" : "track"}...`});

@@ -1,5 +1,6 @@
 const voiceChecks = require("../../util/music/validateVoiceChannel");
 const queueChecks = require("../../util/music/validateQueuePlaying");
+const isInteraction = require("../../util/isInteraction");
 
 /**
  * Creates an array of stings that hold the name and track length of all the tracks in
@@ -55,7 +56,7 @@ const queueChecks = require("../../util/music/validateQueuePlaying");
  */
 exports.run = async (client, message) => {
     const queue = client.player.getQueue(message.guildId);
-    const isInteraction = (message.commandName !== undefined);
+    //const isInteraction = (message.commandName !== undefined);
 
     if (voiceChecks(message, queue) === false) { return; }
     if (queueChecks(message, queue) === false) { return; }
@@ -75,8 +76,8 @@ exports.run = async (client, message) => {
         }
         return;
         
-    } catch(err) {
-        console.error(err);
+    } catch(error) {
+        console.error(error);
         return void message.reply({content: 'An error occured while getting the queue'});
     }
 }
