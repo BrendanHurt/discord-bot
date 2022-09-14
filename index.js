@@ -12,7 +12,7 @@ const client = new Client({
 });
 
 const player = new Player(client);
-client.player = player; //find a better way to do this later
+client.player = player;
 
 client.commands = new Collection();
 client.interactions = new Collection();
@@ -39,7 +39,7 @@ process.on('unhandledRejection', error => {
 
 //////////////////////////////////////////////////////////////////////
 //discord player stuff, move later
-const { EmbedBuilder } = require('@discordjs/builders');
+const { EmbedBuilder } = require("discord.js");
 function createPlayerEmbed(track) {
     const playerEmbed = new EmbedBuilder()
         .setColor(0x0099FF)
