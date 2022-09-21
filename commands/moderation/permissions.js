@@ -34,6 +34,12 @@ exports.run = async (client, message, args) => {
     }
 }
 
+/**
+ * Either gets all the permissions for a user, or checks if the user has a given permission.
+ * @param {Message} message The message that prompted the command
+ * @param {[userId: int | @user: string, targetPermission: string]} args the user
+ * and, optionally, a permission to check if the user has that permission
+ */
 async function userPermissions(message, args) {
 
     //--------------------add input validation later------------------------
@@ -64,6 +70,48 @@ async function userPermissions(message, args) {
     return void message.reply(permissions ? permissions.join("\n") : "No permissions found for that user!");
 }
 
+/**
+ * 
+ * @param {Message} message The message that prompted this command
+ * @param {[roleId: Snowflake, get | edit: string, permission: string]} args 
+ * 
+ * 
+ * For roles:
+ *      <roleID> <get | edit> [permission] [value]
+ */
 async function rolePermissions(message, args) {
-    return void message.reply("Role permissions are currently being implemented!");
+
+    const roleID = isNaN(args[0]) ? args[0]?.slice(3,-1) : args[0];
+    if (!roleID || isNaN(roleID)) {
+        return message.reply(`${args[0]} is not a valid role ID, please copy the ID for a role or use an @`);
+    }
+    const action = args[1];
+    const permission = args[2];
+
+    //get the role's permissions
+    if (action === "get") {
+        const role = await message.guild.roles.fetch(roleID)
+            .then()
+            .catch(console.error);
+        if (!role) {
+            return void message.reply("Couldn\'t find that role!");
+        }
+        const rolePerms = role.permissions.toArray();
+
+        //check for a specific permission on the role
+        if (permission) {
+            return void message.reply(`${role.name} ${role.permissions.has(permission) ? "has" : "doesn\'t have"} the ${permission} permission`);
+        }
+
+        //getting all permissions, reply with either:
+        //  1. The permissions for the role
+        //  2. An error message stating that the role doesn't have any permissions
+        return void message.reply(rolePerms.length > 0 ? rolePerms.join("\n") 
+            : "This role doesn\'t have any permissions!");
+
+    } else if (action === "edit") { //edit the role's permissions
+        return void message.reply("Edited the role\'s permissions!");
+    } else {
+        return void message.reply("Invalid action, please use get or edit");
+    }
 }
