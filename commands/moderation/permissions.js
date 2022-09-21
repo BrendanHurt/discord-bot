@@ -73,10 +73,10 @@ async function userPermissions(message, args) {
 /**
  * 
  * @param {Message} message The message that prompted this command
- * @param {[roleId: Snowflake, get | edit: string, permission: string]} args 
+ * @param {[roleId: Snowflake, action: string, permission: string, value: ]} args 
  * 
  * 
- * For roles:
+ * Role args:
  *      <roleID> <get | edit> [permission] [value]
  */
 async function rolePermissions(message, args) {
@@ -100,7 +100,12 @@ async function rolePermissions(message, args) {
 
         //check for a specific permission on the role
         if (permission) {
-            return void message.reply(`${role.name} ${role.permissions.has(permission) ? "has" : "doesn\'t have"} the ${permission} permission`);
+            try {
+                return void message.reply(`${role.name} ${role.permissions.has(permission) ? "has" : "doesn\'t have"} the ${permission} permission`);
+            } catch(error) {
+                console.error(error);
+                return void message.reply(`${permission} is not a valid permission flag`);
+            }
         }
 
         //getting all permissions, reply with either:
