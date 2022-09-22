@@ -45,25 +45,25 @@ async function userPermissions(message, args) {
     //--------------------add input validation later------------------------
     //remove the @ formatting if the user argument used an @
     const userID = isNaN(args[0]) ? args[0]?.slice(2,-1) : args[0];
-    const targetPermission = args[1];
+    const permission = args[1];
 
     if (!userID || isNaN(userID)) {
         return void message.reply("No user, or invalid user, provided! Please use a user\'s ID, or an @ of a user");
     }
 
     //get the user
-    const user = await message.guild.members.fetch(userID)
+    const member = await message.guild.members.fetch(userID)
         .then()
         .catch(console.error);
-    if (!user) {
+    if (!member) {
         return void message.reply("Something went wrong while trying to find this user!");
     }
 
-    const permissions = user.permissions.toArray();
+    const permissions = member.permissions.toArray();
 
     //checking if the user has a specific permission
-    if (targetPermission) {
-        return void message.reply(`This user ${permissions.includes(targetPermission) ? "does" : "doesn\'t"} have this permission`);
+    if (permission) {
+        return void message.reply(`${member.user.username} ${permissions.includes(permission) ? "has" : "doesn\'t have"} the ${permission}  permission`);
     }
 
     //get all of the permissions for the user
@@ -71,7 +71,7 @@ async function userPermissions(message, args) {
 }
 
 /**
- * 
+ * Gets or edits the permissions of a role
  * @param {Message} message The message that prompted this command
  * @param {[roleId: Snowflake, action: string, permission: string, value: ]} args 
  * 
@@ -80,22 +80,31 @@ async function userPermissions(message, args) {
  *      <roleID> <get | edit> [permission] [value]
  */
 async function rolePermissions(message, args) {
+    //check that the message author has the manage roles permission
+    //(a bit janky, but )
+    const authorMember = await message.guild.members.fetch(message.author.id);
+    if (!authorMember.roles.highest.permissions.has("ManageRoles")) {
+        return void message.reply("You don't have the ManageRoles permission!");
+    }
 
+    //get the role by its id
     const roleID = isNaN(args[0]) ? args[0]?.slice(3,-1) : args[0];
     if (!roleID || isNaN(roleID)) {
         return message.reply(`${args[0]} is not a valid role ID, please copy the ID for a role or use an @`);
     }
+    const role = await message.guild.roles.fetch(roleID)
+        .then()
+        .catch(console.error);
+    if (!role) { return void message.reply("Couldn\'t find that role!"); }
+
     const action = args[1];
     const permission = args[2];
+    const value = (args[3]?.toLowerCase() === "allow") ? true 
+        : (args[3]?.toLowerCase() === "deny") ? false : undefined;
+
 
     //get the role's permissions
     if (action === "get") {
-        const role = await message.guild.roles.fetch(roleID)
-            .then()
-            .catch(console.error);
-        if (!role) {
-            return void message.reply("Couldn\'t find that role!");
-        }
         const rolePerms = role.permissions.toArray();
 
         //check for a specific permission on the role
@@ -104,7 +113,7 @@ async function rolePermissions(message, args) {
                 return void message.reply(`${role.name} ${role.permissions.has(permission) ? "has" : "doesn\'t have"} the ${permission} permission`);
             } catch(error) {
                 console.error(error);
-                return void message.reply(`${permission} is not a valid permission flag`);
+                return void message.reply(`Something went wrong! Possible that ${permission} is not a valid permission flag. Permissions flags are case sensitive and written in pascal case (e.g. ManageRoles)`);
             }
         }
 
@@ -114,8 +123,36 @@ async function rolePermissions(message, args) {
         return void message.reply(rolePerms.length > 0 ? rolePerms.join("\n") 
             : "This role doesn\'t have any permissions!");
 
-    } else if (action === "edit") { //edit the role's permissions
-        return void message.reply("Edited the role\'s permissions!");
+    //edit the role's permissions
+    } else if (action === "edit") {
+        if (permission === undefined) { return void message.reply("No permissions provided!"); }
+        if (value === undefined) { return void message.reply("Invalid value, please use allow or deny"); }
+        const rolePerms = role.permissions.toArray();
+
+        //giving the role a permission
+        if (value) {
+            rolePerms.push(permission);
+            await role.setPermissions([...rolePerms])
+                .then(() => {
+                    return void message.reply(`${role.name} now has the ${permission} permission`);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    return void message.reply("Something went wrong!");
+                });
+            return;
+        }
+        
+        //removing a permission from a role
+        const permIndex = rolePerms.indexOf(permission);
+        if (permIndex === -1) { return void message.reply(`${role.name} didn\'t have the ${permission} permission`); }
+
+        //remove the permission, clear the role's permissions, and re-add them
+        rolePerms.splice(permIndex, 1);
+        role.setPermissions(0n);
+        role.setPermissions([...rolePerms]);
+        return void message.reply(`Removed ${permission} from ${role.name}`);
+
     } else {
         return void message.reply("Invalid action, please use get or edit");
     }
