@@ -1,6 +1,12 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { 
+    SlashCommandBuilder,
+    SlashCommandSubcommandBuilder,
+    SlashCommandRoleOption,
+    SlashCommandSubcommandGroupBuilder,
+    SlashCommandUserOption,
+    SlashCommandStringOption
+} = require("discord.js");
 const { REST, Routes } = require("discord.js");
-const config = require("../../config.json");
 
 exports.run = async (client, message, args) => {
     await message.client.application.fetch();
@@ -47,10 +53,79 @@ exports.run = async (client, message, args) => {
             .setDescription("Skips the currently playing track"),
         new SlashCommandBuilder()
             .setName("stop")
-            .setDescription("The bot stops playing music and leaves the voice channel")
-    ].map(command => command.toJSON());
+            .setDescription("The bot stops playing music and leaves the voice channel"),
 
-    console.log(commands[1]);
+
+        //permissions
+        new SlashCommandBuilder()
+            .setName("permissions")
+            .setDescription("Get or edit the permissions of a user")
+            .addSubcommandGroup(
+                new SlashCommandSubcommandGroupBuilder()
+                    .setName("role")
+                    .setDescription("Get or edit the permissions of a role")
+                    .addSubcommand(
+                        new SlashCommandSubcommandBuilder()
+                            .setName("get")
+                            .setDescription("Get the permissions of a role")
+                            .addRoleOption(
+                                new SlashCommandRoleOption()
+                                    .setName("role")
+                                    .setDescription("The role who\'s permissions you want to get")
+                                    .setRequired(true)
+                            )
+                            .addStringOption(
+                                new SlashCommandStringOption()
+                                    .setName("permission")
+                                    .setDescription("Check if the roles has this specific permission")
+                            )
+                    )
+                    .addSubcommand(
+                        new SlashCommandSubcommandBuilder()
+                            .setName("edit")
+                            .setDescription("Edit the permissions of a role")
+                            .addRoleOption(
+                                new SlashCommandRoleOption()
+                                    .setName("role")
+                                    .setDescription("The role who\'s permissions you want to edit")
+                                    .setRequired(true)
+                            )
+                            .addStringOption(
+                                new SlashCommandStringOption()
+                                    .setName("permission")
+                                    .setDescription("The permission to be editted")
+                                    .setRequired(true)
+                            )
+                            .addStringOption(
+                                new SlashCommandStringOption()
+                                    .setName("value")
+                                    .setDescription("Set the permission for this role to allow or deny")
+                                    .setRequired(true)
+                                    .setChoices(
+                                        { name: "Allow", value: "allow" },
+                                        { name: "Deny", value: "deny"},
+                                    )
+                            )
+                    )
+            )
+            .addSubcommand(
+                new SlashCommandSubcommandBuilder()
+                    .setName("user")
+                    .setDescription("Get the permissions of a user")
+                    .addUserOption(
+                        new SlashCommandUserOption()
+                            .setName("user")
+                            .setDescription("The user who's permissions you want to get")
+                            .setRequired(true)
+                    )
+                    .addStringOption(
+                        new SlashCommandStringOption()
+                            .setName("permission")
+                            .setDescription("Check if the user has this specific permission")
+                    )
+            )
+                
+    ].map(command => command.toJSON());
     
     const rest = new REST({version: "10"}).setToken(client.token);
     try {
