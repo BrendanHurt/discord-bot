@@ -149,11 +149,6 @@ async function rolePermissions(message, args) {
  *      <channelID> <get | edit | copy> <role | user | channel> <roleID | userID | channelID> [permission] [value] [reason]
  */
 async function channelOverwrites(message, args) {
-    const member = await message.guild.members.fetch(message.author.id);
-    if (!member.permissions.has("ManageChannels")) {
-        return void message.reply("You don\'t have the Manage Channels permission!");
-    }
-
     //handle the args
     const channelID = isNaN(args[0]) ? args[0]?.slice(2,-1) : args[0];
     const channel = await message.guild.channels.fetch(channelID)
@@ -162,8 +157,17 @@ async function channelOverwrites(message, args) {
     const action = args[1]?.toLowerCase();
     const targetType = args[2]?.toLowerCase();
     const targetID = isNaN(args[3]) ? args[3]?.slice(args[3]?.search(/[0-9]/), -1) : args[3];
-    //const perms = args[4];
-    //const value = args[5];
+    const perms = args[4];
+    const value = args[5]?.toLowerCase();
+
+    //check if the author has the appropriate permissions
+    const author = await message.guild.members.fetch(message.author.id);
+    if (!author.permissions.has("ManageChannels")) {
+        return void message.reply("You don\'t have the Manage Channels permission!");
+    }
+    if (targetType === "role" && !author.permissions.has("ManageRoles")) {
+        return void message.reply("You don\'t have the Manage Roles permission!")
+    }
 
     //validate arguments
     if (!channelID || isNaN(channelID)) { return void message.reply("Invalid channel id!"); }
@@ -171,26 +175,27 @@ async function channelOverwrites(message, args) {
     if (!action) { return void message.reply("No action given!"); }
     if (!targetID || isNaN(targetID)) { return void message.reply("Invalid role, user, or channel ID!"); }
 
+    //move to a function that returns an object later
+    let target;
+    let targetName;
+    //fetch the target
+    if (targetType === "user") {
+        target = await message.guild.members.fetch(targetID)
+            .then()
+            .catch(console.error);
+        targetName = target?.user.username;
+
+    } else if (targetType === "role") {
+        target = await message.guild.roles.fetch(targetID)
+            .then()
+            .catch(console.error);
+        targetName = target?.name;
+    } else {
+        return void message.reply("Invalid target type, please user a user or role");
+    }
 
     //getting the overwrites for a user or role
     if (action === "get") {
-        let target;
-        let name;
-        //fetch the target
-        if (targetType === "user") {
-            target = await message.guild.members.fetch(targetID)
-                .then()
-                .catch(console.error);
-            name = target?.user.username;
-
-        } else if (targetType === "role") {
-            target = await message.guild.roles.fetch(targetID)
-                .then()
-                .catch(console.error);
-            name = target?.name;
-        } else {
-            return void message.reply("Invalid target type, please user a user or role");
-        }
 
         //check validity of target
         if (!target) {
@@ -200,16 +205,39 @@ async function channelOverwrites(message, args) {
         //reply with the overwrites that the target has, if any
         const overwrites = [...channel.permissionsFor(target)];
         if (overwrites.length <= 0) {
-            return void message.reply(`${name} doesn\'t have any non-default permissions in the ${channel.name} channel!`);
+            return void message.reply(`${targetName} doesn\'t have any non-default permissions in the ${channel.name} channel!`);
         }
-        return void message.reply(`Permissions for ${name} in the ${channel.name} channel: \n${overwrites.join("\n")}`);
+        return void message.reply(`Permissions for ${targetName} in the ${channel.name} channel: \n${overwrites.join("\n")}`);
 
-    } else if (action === "edit") {
-        message.reply("Channel overwrite editing to be implemented soon!");
+    } else if (action === "edit") { //editing the overwrites for a user or role
+        //make sure the permission is valid
+        if (PermissionsBitField.Flags[perms] === undefined) { return void message.reply(`${perms} is not a valid permission`); }
+
+        //handle the value
+        const validValues = {
+            "allow": true,
+            "deny": false,
+            "default": null
+        };
+        const valueToSet = validValues[value];
+        if (valueToSet === undefined) { return void message.reply("Invalid value, please use allow, deny, or default"); }
+        const permOverwriteOptions = { [perms]: valueToSet };
+
+        //add the corresponding permission
+        channel.permissionOverwrites.edit(targetID, permOverwriteOptions)
+            .then(
+                message.reply(`**${perms}** permission set to **${value}** for ${targetType}: **${targetName}** in channel: **${channel.name}**`)
+            )
+            .catch((error) => {
+                console.error(error);
+                message.reply("Something went wrong!");
+            });
+        return;
+
     } else if (action === "copy") {
         message.reply("Channel overwrite copying to be implemented soon!");
     } else {
-        message.reply("Invalid Action");
+        message.reply(`${action} is not a valid action`);
     }
 }
 
