@@ -1,19 +1,20 @@
 const voiceChecks = require("../../util/music/validateVoiceChannel");
 const queueChecks = require("../../util/music/validateQueuePlaying");
+const isInteraction = require("../../util/isInteraction");
 
 exports.name = 'remove_track'
 
 exports.run = (client, message, args) => {
 
-    const trackNumber = (!message.commandName) ? args[0] - 1 : message.options.get("position").value - 1;
+    const trackNumber = (!isInteraction(message)) ? args[0] - 1 : message.options.get("position").value - 1;
     const queue = client.player.getQueue(message.guildId);
 
     if (voiceChecks(message, queue) === false) { return; }
     if (queueChecks(message, queue) === false) { return; }
 
     //validate args
-    if (!message.commandName && args.length <= 0 
-            || message.commandName && message.options.get("position") === null) {
+    if (!isInteraction(message) && args.length <= 0 
+            || isInteraction(message) && message.options.get("position") === null) {
         return void message.reply({content: '❌ | No track number was given!', ephemeral: true});
     }
 

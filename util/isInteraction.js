@@ -1,5 +1,3 @@
-exports.name = "isInteraction";
-
-exports.run = async (message) => {
+module.exports = isInteraction = (message) => {
     return message.commandName !== undefined;
 }

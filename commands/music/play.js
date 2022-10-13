@@ -21,11 +21,11 @@ exports.run = async (client, message, args) => {
     /////////////////////////////////////////////////////////////////////////
     //searching for a track
     const player = client.player;
-    const query = (!isInteraction) ? args[0] : message.options.get("query").value;
-    let max = (!isInteraction) ? args[1] : message.options.get("result_limit")?.value;
+    const query = (!isInteraction(message)) ? args[0] : message.options.get("query").value;
+    let max = (!isInteraction(message)) ? args[1] : message.options.get("result_limit")?.value;
 
     const searchResult = await player.search(query, {
-        requestedBy: (isInteraction) ? message.user : message.author.username,
+        requestedBy: (isInteraction(message)) ? message.user : message.author.username,
         searchEngine: QueryType.AUTO
     })
     .catch(() => {console.log('error while searching for the given query')});

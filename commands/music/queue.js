@@ -56,19 +56,18 @@ const isInteraction = require("../../util/isInteraction");
  */
 exports.run = async (client, message) => {
     const queue = client.player.getQueue(message.guildId);
-    //const isInteraction = (message.commandName !== undefined);
 
     if (voiceChecks(message, queue) === false) { return; }
     if (queueChecks(message, queue) === false) { return; }
 
-    if (isInteraction) { await message.deferReply(); }
+    if (isInteraction(message)) { await message.deferReply(); }
 
     try {
 
         const pages = paginateQueue(queue);
 
         for (page of pages) {
-            if (isInteraction) {
+            if (isInteraction(message)) {
                 message.followUp({content: page});
             } else {
                 message.reply({content: page});
