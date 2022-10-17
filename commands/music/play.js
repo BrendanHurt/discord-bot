@@ -77,3 +77,24 @@ exports.run = async (client, message, args) => {
         message.reply({content: 'Something went wrong while trying to queue the request', ephemeral: true});
     }
 }
+
+/**
+ * Combines the arguments into an object so 
+ * @param {Message} message The message that prompted the command, used for displaying error messages
+ * @param {[[string]]} args The user-provided arguments in the form of an array of string arrays
+ * @return {} An object holding the query, and playlist limit if provided
+ */
+function playArgHandler(message, args) {
+    let commandArgs = {};
+
+    //recombine the strings for the query (args[0]) if it was split
+    commandArgs.query = args[0].join(" ");
+
+    //add the playlist limit (args[1]) if it's there
+    if (args[1] !== undefined) {
+        args[1].shift();
+        commandArgs.limit = args[1];
+    }
+
+    return commandArgs;
+}
