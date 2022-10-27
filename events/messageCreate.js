@@ -4,8 +4,8 @@ module.exports = (client, message) => {
     if (message.author.bot) {return;}
     if (message.content.indexOf(config.prefix) !== 0) {return;}
 
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
-    const commandName = args.shift().toLowerCase();
+    const args = parseArgs(message.content);
+    const commandName = args[0]?.shift().toLowerCase().slice(1);
 
     const command = client.commands.get(commandName);
     if (!command) {return;}

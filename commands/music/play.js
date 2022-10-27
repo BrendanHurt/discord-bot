@@ -18,17 +18,23 @@ exports.run = async (client, message, args) => {
 
     if (voiceChecks(message) === false) { return; }
 
+    const commandArgs = playArgHandler(message, args);
+    const player = client.player;
+
     /////////////////////////////////////////////////////////////////////////
     //searching for a track
-    const player = client.player;
-    const query = (!isInteraction(message)) ? args[0] : message.options.get("query").value;
-    let max = (!isInteraction(message)) ? args[1] : message.options.get("result_limit")?.value;
-
-    const searchResult = await player.search(query, {
-        requestedBy: (isInteraction(message)) ? message.user : message.author.username,
+    console.log(`Query: ${commandArgs.query}\nLimit: ${commandArgs.limit}`);
+    const searchResult = await player.search(commandArgs.query, {
+        requestedBy: (!isInteraction(message)) ? message.author.username : message.user.username,
         searchEngine: QueryType.AUTO
     })
-    .catch(() => {console.log('error while searching for the given query')});
+    .then()
+    .catch((error) => {
+        console.error(error);
+        console.log('error while searching for the given query');
+    });
+
+    //console.log(`Search results: ${JSON.stringify(searchResult)}`); //remove later
 
     if (!searchResult || !searchResult.tracks.length) {
         return void message.reply({content: 'No results were found!', ephemeral: true});
@@ -53,10 +59,12 @@ exports.run = async (client, message, args) => {
     //adding the track, or tracks, to the queue
     try {
 
-        if (!max || max > searchResult.tracks.length) { max = searchResult.tracks.length; }
-
+        if (!commandArgs.limit || commandArgs.limit > searchResult.tracks.length) {
+            commandArgs.limit = searchResult.tracks.length;
+        }
+        console.log(commandArgs.limit);
         if (searchResult.playlist) {
-            for (let i = 0; i < max; i++) {
+            for (let i = 0; i < commandArgs.limit; i++) {
                 setTimeout(function() {}, 2000);
                 queue.addTrack(searchResult.tracks[i]);
             }
@@ -80,7 +88,7 @@ exports.run = async (client, message, args) => {
 
 /**
  * Combines the arguments into an object so 
- * @param {Message} message The message that prompted the command, used for displaying error messages
+ * @param {Message} message The message that prompted the command
  * @param {[[string]]} args The user-provided arguments in the form of an array of string arrays
  * @return {} An object holding the query, and playlist limit if provided
  */
@@ -88,13 +96,18 @@ function playArgHandler(message, args) {
     let commandArgs = {};
 
     //recombine the strings for the query (args[0]) if it was split
-    commandArgs.query = args[0].join(" ");
+    commandArgs.query = (!isInteraction(message)) ? args[0].join(" ") : message.options.get("query").value;
+
+    if (isInteraction(message)) {
+        console.log(message.options.get("limit")?.value);
+        commandArgs.limit = message.options.get("limit")?.value;
+        return commandArgs;
+    }
 
     //add the playlist limit (args[1]) if it's there
     if (args[1] !== undefined) {
         args[1].shift();
-        commandArgs.limit = args[1];
+        commandArgs.limit = Number(args[1].shift());
     }
-
     return commandArgs;
 }
