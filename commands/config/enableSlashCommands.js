@@ -4,7 +4,8 @@ const {
     SlashCommandRoleOption,
     SlashCommandSubcommandGroupBuilder,
     SlashCommandUserOption,
-    SlashCommandStringOption
+    SlashCommandStringOption,
+    SlashCommandChannelOption
 } = require("discord.js");
 const { REST, Routes } = require("discord.js");
 
@@ -55,76 +56,111 @@ exports.run = async (client, message, args) => {
             .setName("stop")
             .setDescription("The bot stops playing music and leaves the voice channel"),
 
-
-        //permissions
         new SlashCommandBuilder()
-            .setName("permissions")
-            .setDescription("Get or edit the permissions of a user")
+            .setName("set-perms")
+            .setDescription("Set the permissions for a role, or channel overwrites for a role or user in a channel")
             .addSubcommandGroup(
                 new SlashCommandSubcommandGroupBuilder()
-                    .setName("role")
-                    .setDescription("Get or edit the permissions of a role")
+                    .setName("channel-overwrites")
+                    .setDescription("Overwrite permissions for a user or role in a channel")
+                    //role overwrites subcommand
                     .addSubcommand(
                         new SlashCommandSubcommandBuilder()
-                            .setName("get")
-                            .setDescription("Get the permissions of a role")
-                            .addRoleOption(
-                                new SlashCommandRoleOption()
-                                    .setName("role")
-                                    .setDescription("The role who\'s permissions you want to get")
+                            .setName("role")
+                            .setDescription("Set the overwrites for a role in the given channel")
+                            .addStringOption(
+                                new SlashCommandStringOption()
+                                    .setName("allow-or-deny")
+                                    .setDescription("Setting the overwrites to be allowed or denied")
+                                    .setChoices(
+                                        { name: "allow", value: "allow" },
+                                        { name: "deny", value: "deny" }
+                                    )
                                     .setRequired(true)
                             )
                             .addStringOption(
                                 new SlashCommandStringOption()
-                                    .setName("permission")
-                                    .setDescription("Check if the roles has this specific permission")
+                                    .setName("overwrites")
+                                    .setDescription("The permissions you want to overwrite")
+                                    .setRequired(true)
+                            )
+                            .addRoleOption(
+                                new SlashCommandRoleOption()
+                                    .setName("role")
+                                    .setDescription("The role who's permissions you want to overwrite")
+                                    .setRequired(true)
+                            )
+                            .addChannelOption(
+                                new SlashCommandChannelOption()
+                                    .setName("channel")
+                                    .setDescription("The channel where the role\'s permissions will be overwritten")
+                                    .setRequired(true)
                             )
                     )
+                    //user overwrites subcommand
                     .addSubcommand(
                         new SlashCommandSubcommandBuilder()
-                            .setName("edit")
-                            .setDescription("Edit the permissions of a role")
-                            .addRoleOption(
-                                new SlashCommandRoleOption()
-                                    .setName("role")
-                                    .setDescription("The role who\'s permissions you want to edit")
-                                    .setRequired(true)
-                            )
+                            .setName("user")
+                            .setDescription("Overwrite the permissions for a user in the channel")
                             .addStringOption(
                                 new SlashCommandStringOption()
-                                    .setName("permission")
-                                    .setDescription("The permission to be editted")
-                                    .setRequired(true)
-                            )
-                            .addStringOption(
-                                new SlashCommandStringOption()
-                                    .setName("value")
-                                    .setDescription("Set the permission for this role to allow or deny")
-                                    .setRequired(true)
-                                    .setChoices(
+                                    .setName("allow-or-deny")
+                                    .setDescription("Setting the overwrites to be allowed or denied")
+                                    .addChoices(
                                         { name: "Allow", value: "allow" },
-                                        { name: "Deny", value: "deny"},
+                                        { name: "Deny", value: "deny" }
                                     )
+                                    .setRequired(true)
+                            )
+                            .addStringOption(
+                                new SlashCommandStringOption()
+                                    .setName("overwrites")
+                                    .setDescription("The permissions you want to overwrite")
+                                    .setRequired(true)
+                            )
+                            .addUserOption(
+                                new SlashCommandUserOption()
+                                    .setName("user")
+                                    .setDescription("The user who's permissions you want to overwrite")
+                                    .setRequired(true)
+                            )
+                            .addChannelOption(
+                                new SlashCommandChannelOption()
+                                    .setName("channel")
+                                    .setDescription("The channel where the user\'s permissions will be overwritten")
+                                    .setRequired(true)
                             )
                     )
             )
+            //subcommand for role permissions
             .addSubcommand(
                 new SlashCommandSubcommandBuilder()
-                    .setName("user")
-                    .setDescription("Get the permissions of a user")
-                    .addUserOption(
-                        new SlashCommandUserOption()
-                            .setName("user")
-                            .setDescription("The user who's permissions you want to get")
+                    .setName("role")
+                    .setDescription("Change the permissions for a role")
+                    .addStringOption(
+                        new SlashCommandStringOption()
+                            .setName("allow-or-deny")
+                            .setDescription("Setting the permissions to be allowed or denied")
+                            .addChoices(
+                                { name: "Allow", value: "allow" },
+                                { name: "Deny", value: "deny" }
+                            )
                             .setRequired(true)
                     )
                     .addStringOption(
                         new SlashCommandStringOption()
-                            .setName("permission")
-                            .setDescription("Check if the user has this specific permission")
+                            .setName("permissions")
+                            .setDescription("The permissions that you want to change")
+                            .setRequired(true)
+                    )
+                    .addRoleOption(
+                        new SlashCommandRoleOption()
+                            .setName("role")
+                            .setDescription("The role who\'s permissions you want to change")
+                            .setRequired(true)
                     )
             )
-                
+      
     ].map(command => command.toJSON());
     
     const rest = new REST({version: "10"}).setToken(client.token);
@@ -141,3 +177,6 @@ exports.run = async (client, message, args) => {
         await message.reply("Something went wrong!");
     }
 }
+
+//subcommand group for channel overwrites
+            /**/
