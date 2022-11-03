@@ -34,8 +34,6 @@ exports.run = async (client, message, args) => {
         console.log('error while searching for the given query');
     });
 
-    //console.log(`Search results: ${JSON.stringify(searchResult)}`); //remove later
-
     if (!searchResult || !searchResult.tracks.length) {
         return void message.reply({content: 'No results were found!', ephemeral: true});
     }
