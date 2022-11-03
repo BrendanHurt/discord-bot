@@ -56,9 +56,12 @@ exports.run = async (client, message, args) => {
             .setName("stop")
             .setDescription("The bot stops playing music and leaves the voice channel"),
 
+        //@TODO: add auto-complete to the permissions
+        //@TODO: add logging to the moderation commands
         new SlashCommandBuilder()
             .setName("set-perms")
             .setDescription("Set the permissions for a role, or channel overwrites for a role or user in a channel")
+            //subcommand group for channel overwrites for users & roles
             .addSubcommandGroup(
                 new SlashCommandSubcommandGroupBuilder()
                     .setName("channel-overwrites")
@@ -80,7 +83,7 @@ exports.run = async (client, message, args) => {
                             )
                             .addStringOption(
                                 new SlashCommandStringOption()
-                                    .setName("overwrites")
+                                    .setName("permissions")
                                     .setDescription("The permissions you want to overwrite")
                                     .setRequired(true)
                             )
@@ -114,7 +117,7 @@ exports.run = async (client, message, args) => {
                             )
                             .addStringOption(
                                 new SlashCommandStringOption()
-                                    .setName("overwrites")
+                                    .setName("permissions")
                                     .setDescription("The permissions you want to overwrite")
                                     .setRequired(true)
                             )
