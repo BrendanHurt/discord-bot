@@ -7,7 +7,7 @@ exports.name = 'remove_track'
 /**
  * Removes a track from the queue
  * @param {Client} client The client application for the bot
- * @param {*} message The message that prompted this command
+ * @param {Message} message The message that prompted this command
  * @param {*} args The array of arguments, should hold one int
  */
 exports.run = (client, message, args) => {

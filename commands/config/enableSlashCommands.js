@@ -39,7 +39,7 @@ exports.run = async (client, message, args) => {
             .setName("queue")
             .setDescription("Displays the music queue"),
         new SlashCommandBuilder()
-            .setName("remove_track")
+            .setName("remove-track")
             .setDescription("Removes the track at the given position in the queue")
             .addIntegerOption(option => 
                 option.setName("position")
@@ -76,8 +76,8 @@ exports.run = async (client, message, args) => {
                                     .setName("allow-or-deny")
                                     .setDescription("Setting the overwrites to be allowed or denied")
                                     .setChoices(
-                                        { name: "allow", value: "allow" },
-                                        { name: "deny", value: "deny" }
+                                        { name: "Allow", value: "allow" },
+                                        { name: "Deny", value: "deny" }
                                     )
                                     .setRequired(true)
                             )
