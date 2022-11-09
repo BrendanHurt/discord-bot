@@ -27,7 +27,9 @@ exports.run = async (client, message) => {
         return void message.reply("Changing permissions is only supported via slash commands");
     }
     //defer in case setting the permissions takes too long
-    message.deferReply({ephemeral: true});
+    await message.deferReply()
+        .then()
+        .catch(console.error);
 
     //parse the options
     const allowFlag = (message.options.get("allow-or-deny").value === "allow") ? true : false;
@@ -62,7 +64,7 @@ async function rolePerms(message, allowFlag, perms, roleID) {
     //allowing permissions
     if (allowFlag === true) {
         for (const perm of perms) {
-            if (rolePerms.indexOf() === -1) { rolePerms.push(perm); }
+            if (rolePerms.indexOf(perm) === -1) { rolePerms.push(perm); }
         }
 
     //denying permissions
