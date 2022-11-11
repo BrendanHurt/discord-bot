@@ -91,20 +91,29 @@ async function rolePerms(message, allowFlag, perms, roleID) {
  * @param {Message} message The message that prompted the command, used for getting options
  * @param {bool} allowFlag Whether to allow or deny the permissions
  * @param {[string]} perms The array of permissions being changed
- * @param {Channel} channel The channel who's overwrites are being changed
- * @param {Role | User} roleOrUserID The user/role who's overwrites for the channel are being changed
+ * @param {Channel} targetChannel The channel who's overwrites are being changed
+ * @param {Role | User} userOrRoleID The user/role who's overwrites for the channel are being changed
+ * 
+ * @TODO add the option to give a reason for changing permission overwrites
  */
-async function channelOverwrites(message, allowFlag, perms, channel, roleOrUserID) {
-    
-    //trying to figure out why hasOwnProperty isn't working the way i'm expecting it to
+async function channelOverwrites(message, allowFlag, perms, targetChannel, userOrRoleID) {
 
     const isUser = message.options._subcommand === "user";
-    const userOrRole = await (isUser ? message.guild.members.fetch(roleOrUserID) : message.guild.roles.fetch(roleOrUserID));
+    const userOrRole = await (isUser ? message.guild.members.fetch(userOrRoleID) : message.guild.roles.fetch(userOrRoleID));
+    const channel = await message.guild.channels.fetch(targetChannel);
+    let options = {};
 
     //get the overwrites set for the target user/role, if there isn't one, create one
     //then, set the values of each permission based on the allowFlag
+    for (const perm of perms) {
+        Object.assign(options, {[perm]: allowFlag});
+    }
+
+    await channel.permissionOverwrites.edit(userOrRole, options)
+        .then()
+        .catch(console.error);
 
     //for now, logging the args & replying to the command
-    console.log(`AllowFlag: ${allowFlag}\nPermissions: ${perms}\nChannel: ${channel}\nRoleOrUser: ${roleOrUserID}`);
-    return void message.reply(`Channel overwrites set to ${allowFlag ? "allowed" : "denied"} for ${isUser ? userOrRole.user.username : userOrRole.name}`);
+    console.log(`AllowFlag: ${allowFlag}\nPermissions: ${perms}\nChannel: ${targetChannel}\nRoleOrUser: ${userOrRoleID}`);
+    return void message.followUp(`Channel overwrites in ${channel.name} set to ${allowFlag ? "allowed" : "denied"} for ${isUser ? userOrRole.user.username : userOrRole.name}`);
 }
