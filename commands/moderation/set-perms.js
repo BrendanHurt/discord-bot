@@ -61,18 +61,12 @@ async function rolePerms(message, allowFlag, perms, roleID) {
     const roleName = role.name;
     const rolePerms = role.permissions.toArray();
 
-    //allowing permissions
-    if (allowFlag === true) {
-        for (const perm of perms) {
-            if (rolePerms.indexOf(perm) === -1) { rolePerms.push(perm); }
-        }
-
-    //denying permissions
-    } else {
-        for (const perm of perms) {
-            const index = rolePerms.indexOf(perm);
-            if (index !== -1) { rolePerms.splice(index, 1)};
-        }
+    for (const perm of perms) {
+        const index = rolePerms.indexOf(perm);
+        //allow perm
+        if (allowFlag && index === -1) { rolePerms.push(perm); }
+        //deny perm
+        else if (!allowFlag && index !== -1) { rolePerms.splice(index, 1)};
     }
     
     //setting the permissions
