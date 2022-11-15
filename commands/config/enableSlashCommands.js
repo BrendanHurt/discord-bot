@@ -73,11 +73,12 @@ exports.run = async (client, message, args) => {
                             .setDescription("Set the overwrites for a role in the given channel")
                             .addStringOption(
                                 new SlashCommandStringOption()
-                                    .setName("allow-or-deny")
+                                    .setName("permission-value")
                                     .setDescription("Setting the overwrites to be allowed or denied")
                                     .setChoices(
                                         { name: "Allow", value: "allow" },
-                                        { name: "Deny", value: "deny" }
+                                        { name: "Deny", value: "deny" },
+                                        { name: "Default", value: "default" }
                                     )
                                     .setRequired(true)
                             )
@@ -107,11 +108,12 @@ exports.run = async (client, message, args) => {
                             .setDescription("Overwrite the permissions for a user in the channel")
                             .addStringOption(
                                 new SlashCommandStringOption()
-                                    .setName("allow-or-deny")
+                                    .setName("permission-value")
                                     .setDescription("Setting the overwrites to be allowed or denied")
                                     .addChoices(
                                         { name: "Allow", value: "allow" },
-                                        { name: "Deny", value: "deny" }
+                                        { name: "Deny", value: "deny" },
+                                        { name: "Default", value: "default" }
                                     )
                                     .setRequired(true)
                             )
@@ -142,7 +144,7 @@ exports.run = async (client, message, args) => {
                     .setDescription("Change the permissions for a role")
                     .addStringOption(
                         new SlashCommandStringOption()
-                            .setName("allow-or-deny")
+                            .setName("permission-value")
                             .setDescription("Setting the permissions to be allowed or denied")
                             .addChoices(
                                 { name: "Allow", value: "allow" },
