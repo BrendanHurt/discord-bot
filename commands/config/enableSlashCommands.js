@@ -182,6 +182,3 @@ exports.run = async (client, message, args) => {
         await message.reply("Something went wrong!");
     }
 }
-
-//subcommand group for channel overwrites
-            /**/

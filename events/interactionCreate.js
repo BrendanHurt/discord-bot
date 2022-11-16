@@ -1,6 +1,3 @@
-//TODO: remove the voice channel check from here, and put it in like
-//      a shared file that the music commands
-
 const getInteractions = require('../util/getFiles');
 
 module.exports = async (client, interaction) => {
