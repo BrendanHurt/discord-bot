@@ -8,7 +8,7 @@ const isInteraction = require("../../util/isInteraction");
  * @param {Message} message The message that prompted the command
  */
 exports.run = async (client, message) => {
-    if (!isInteraction) {
+    if (!isInteraction(message)) {
         return void message.reply("Changing permissions is only supported via slash commands");
     }
     //defer in case setting the permissions takes too long
