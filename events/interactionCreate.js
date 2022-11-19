@@ -3,7 +3,7 @@ const getInteractions = require('../util/getFiles');
 module.exports = async (client, interaction) => {
     if (!interaction.isCommand()) {return;}
 
-    const command = client.interactions.get(interaction.commandName);
+    const command = client.interactionCommands.get(interaction.commandName);
 
     if (!command) {
         return void interaction.reply({content: 'Couldn\'t find that command!', ephemeral: true});

@@ -13,13 +13,17 @@ const client = new Client({
 
 const player = new Player(client);
 client.player = player;
-
-client.commands = new Collection();
-client.interactions = new Collection();
 client.embedMessage = undefined; //find a better way to do this later
 
-const commandHandler = require('./util/commandLoader')(client, client.commands, './commands');
-const interactionHandler = require('./util/commandLoader')(client, client.interactions, './commands');
+const commandCategories = ["music", "moderation", "config"];
+client.commands = new Collection();
+client.interactionCommands = new Collection();
+//load the commands into the collections
+for (const category of commandCategories) {
+    require("./util/commandLoader")(client, client.commands, "./commands/" + category);
+    require("./util/commandLoader")(client, client.interactionCommands, "./commands/" + category);
+}
+
 const eventHandler = require('./util/eventHandler')(client);
 
 client.on('ready', () => {

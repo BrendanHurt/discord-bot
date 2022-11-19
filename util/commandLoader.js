@@ -1,8 +1,8 @@
 const getFiles = require('./getFiles');
 
 /**
- * Summary: Maps the names and aliases to the execution of all commands in the given
- *          directory and stores them in the given collection.
+ * Maps the names and aliases to the execution of all commands in the given
+ * directory and stores them in the given collection.
  * @param {Client} client           Interaction point w/ the Discord API.
  * @param {Collection} collection   The collection the commands will be stored in.
  * @param {String} directory        The directory to search through.
@@ -11,6 +11,7 @@ module.exports = async (client, collection, directory) => {
     const files = await getFiles(directory);
 
     files.forEach(file => {
+        //remove the path and extenstion to get just the file name
         const commandName = file.split('/').pop().slice(0, -3);
         const command = require(`.${file}`);
         const aliases = require(`.${file}`).aliases;
@@ -19,7 +20,7 @@ module.exports = async (client, collection, directory) => {
 
         //handle the aliases
         if (aliases !== undefined) {
-            for (alias of aliases) {
+            for (const alias of aliases) {
                 collection.set(alias.toLowerCase(), command);
             }
         }
