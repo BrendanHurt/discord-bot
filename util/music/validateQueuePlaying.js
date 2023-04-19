@@ -4,8 +4,12 @@
  * @return {boolean} returns false if the queue is empty, and true if it isn't empty
  */
 module.exports = (message, queue) => {
-    if (!queue || !queue.playing) {
-        void message.reply({content: '❌ | No music is playing!', ephemeral: true});
+    if (!queue) {
+        void message.reply({conent: `❌ | There isn't a queue!`, ephemeral: true});
+        return false
+    }
+    if (queue.isEmpty() && !queue.node.isPlaying()) {
+        void message.reply({content: '❌ | The queue is empty!', ephemeral: true});
         return false;
     }
     return true;

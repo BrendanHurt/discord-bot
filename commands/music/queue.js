@@ -16,20 +16,14 @@ const isInteraction = require("../../util/isInteraction");
     let pages = [];
     let currPage = '';
 
-    //no music playing
-    if (!queue.playing) {
-        pages.push('❌ | No music is playing!');
-        return pages;
-    }
-
-    currPage = `🎶 | Now Playing:\n ${queue.nowPlaying().title} (${queue.nowPlaying().duration})\n⏱ | Queue:\n`;
+    currPage = `🎶 | Now Playing:\n ${queue.currentTrack.title} (${queue.currentTrack.duration})\n⏱ | Queue:\n`;
 
     if (queue.tracks.length === 0) {
         currPage += 'Queue is empty!';
     }
 
     let position = 1;
-    queue.tracks.forEach(track => {
+    queue.tracks.toArray().forEach(track => {
         let entry = `${position}: ${track.title} (${track.duration})\n`;
 
         //create a page if the message is too long
@@ -55,7 +49,7 @@ const isInteraction = require("../../util/isInteraction");
  * @returns {Void}
  */
 exports.run = async (client, message) => {
-    const queue = client.player.getQueue(message.guildId);
+    const queue = client.player.nodes.get(message.guildId);
 
     if (voiceChecks(message, queue) === false) { return; }
     if (queueChecks(message, queue) === false) { return; }
@@ -66,7 +60,7 @@ exports.run = async (client, message) => {
 
         const pages = paginateQueue(queue);
 
-        for (page of pages) {
+        for (const page of pages) {
             if (isInteraction(message)) {
                 message.followUp({content: page});
             } else {
@@ -77,6 +71,6 @@ exports.run = async (client, message) => {
         
     } catch(error) {
         console.error(error);
-        return void message.reply({content: 'An error occured while getting the queue'});
+        return void message.editReply({content: 'An error occured while getting the queue'});
     }
 }

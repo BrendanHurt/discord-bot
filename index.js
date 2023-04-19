@@ -56,40 +56,44 @@ function createPlayerEmbed(track) {
     return playerEmbed;
 }
 
-player.on('error', (queue, error) => {
-    console.log(`[${queue.guild.name}] Error emitted from the queue: ${error.message}`);
+player.events.on('error', (queue, error) => {
+    console.log(`[${queue.guild.name}] emitted error:\n${error}`);
 });
-player.on('connectionError', (queue, error) => {
-    console.log(`[${queue.guild.name}] Error emitted from the connection: ${error.message}`);
+player.events.on('playerError', (queue, error, track) => {
+    console.log(`[${queue.guild.name}] emitted ${error}`);
 });
 
-player.on('trackStart', async (queue, track) => {
-    queue.metadata.send({embeds: [createPlayerEmbed(track)]});
+player.events.on('playerStart', (queue, track) => {
+    queue.metadata.channel.send({embeds: [createPlayerEmbed(track)]});
     /*if (!client.embedMessage) {
         client.embedMessage = await queue.metadata.send({embeds: [createPlayerEmbed(track)]});
     } else {
         client.embedMessage.edit({embeds: [createPlayerEmbed(track)]});
     }*/
 });
-player.on('trackEnd', (queue, track) => {
-    queue.metadata.send(`✅ | ${track.title} finished playing!`);
+player.events.on('trackEnd', (queue, track) => {
+    queue.metadata.channel.send(`✅ | ${track.title} finished playing!`);
 });
 
-/*player.on('trackAdd', (queue, track) => {
+/*player.on('audioTrackAdd', (queue, track) => {
     queue.metadata.send(`🎶 | Added **${track.title}** to the queue`);
 });
-player.on('tracksAdd', (queue, track) => {
+player.on('audioTracksAdd', (queue, track) => {
     queue.metadata.send('Playlist added to the queue!');
 });*/
 
-player.on('botDisconnect', (queue) => {
-    queue.metadata.send(`❌ | Manually disconnected from the voice channel, clearing the queue!`);
+player.events.on(`playerSkip`, (queue, track) => {
+    queue.metadata.channel.send(`Skipping track: ${track.title}`);
 });
-player.on('channelEmpty', (queue) => {
-    queue.metadata.send(`❌ | The voice channel is empty, clearing the queue!`);
+
+player.events.on('disconnect', (queue) => {
+    queue.metadata.channel.send(`❌ | Manually disconnected from the voice channel, clearing the queue!`);
 });
-player.on('queueEnd', (queue) => {
-    queue.metadata.send(`✅ | Queue finished!`);
+player.events.on('channelEmpty', (queue) => {
+    queue.metadata.channel.send(`❌ | The voice channel is empty, clearing the queue!`);
+});
+player.events.on('emptyQueue', (queue) => {
+    queue.metadata.channel.send(`✅ | Queue finished!`);
 });
 
 client.login(config.token);

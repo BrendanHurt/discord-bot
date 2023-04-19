@@ -19,68 +19,38 @@ exports.run = async (client, message, args) => {
     if (voiceChecks(message) === false) { return; }
 
     const commandArgs = playArgHandler(message, args);
+    const channel = message.member.voice.channel;
     const player = client.player;
 
     /////////////////////////////////////////////////////////////////////////
     //searching for a track
-    console.log(`Query: ${commandArgs.query}\nLimit: ${commandArgs.limit}`);
+    //console.log(`Query: ${commandArgs.query}\nLimit: ${commandArgs.limit}`);
+    await message.deferReply();
     const searchResult = await player.search(commandArgs.query, {
         requestedBy: (!isInteraction(message)) ? message.author.username : message.user.username,
-        searchEngine: QueryType.AUTO
+        fallbackSearchEngine: `youtube`
     })
-    .then()
-    .catch((error) => {
-        console.error(error);
-        console.log('error while searching for the given query');
+        .then()
+        .catch((error) => {
+            console.error(error);
+            console.log('error while searching for the given query');
     });
 
-    if (!searchResult || !searchResult.tracks.length) {
+    if (!searchResult || !searchResult.hasTracks()) {
         return void message.reply({content: 'No results were found!', ephemeral: true});
     }
-
-    /////////////////////////////////////////////////////////////////////////
-    //creating the queue & connecting
-    const queue = player.createQueue(message.guild, {
-        metadata: message.channel,
-        leaveOnEnd: false
-    });
-    if (!queue.connection) {
-        await queue.connect(message.member.voice.channel)
-            .catch((error) => {
-                console.error(error);
-                void player.deleteQueue(message.guildId);
-                return void message.reply({content: 'Could not join your voice channel!', ephemeral: true});
-            });
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    //adding the track, or tracks, to the queue
     try {
-
-        if (!commandArgs.limit || commandArgs.limit > searchResult.tracks.length) {
-            commandArgs.limit = searchResult.tracks.length;
-        }
-        console.log(commandArgs.limit);
-        if (searchResult.playlist) {
-            for (let i = 0; i < commandArgs.limit; i++) {
-                setTimeout(function() {}, 2000);
-                queue.addTrack(searchResult.tracks[i]);
+        const { track } = await player.play(channel, searchResult, {
+            nodeOptions: {
+                metadata: message,
+                skipOnNoStream: true,
             }
-        } else {
-            queue.addTrack(searchResult.tracks[0]);
-        }
+        });
+        return message.followUp(`Added **${track.title}** to the queue!`);
 
-        if (!queue.playing) { 
-            await queue.play()
-                .then()
-                .catch(console.error);
-        }
-
-        message.reply({content: `⏱ | loading your ${searchResult.playlist ? "playlist" : "track"}...`});
-
-    } catch (error) {
+    } catch(error) {
+        message.editReply("Something went wrong while playing the track!");
         console.error(error);
-        message.reply({content: 'Something went wrong while trying to queue the request', ephemeral: true});
     }
 }
 
@@ -97,7 +67,8 @@ function playArgHandler(message, args) {
     commandArgs.query = (!isInteraction(message)) ? args[0].join(" ") : message.options.get("query").value;
 
     if (isInteraction(message)) {
-        console.log(message.options.get("limit")?.value);
+        const limitVal = message.options.get(`limit`);
+        console.log((limitVal !== null) ? `Limit set to ${limitVal}` : `No limit set`);
         commandArgs.limit = message.options.get("limit")?.value;
         return commandArgs;
     }

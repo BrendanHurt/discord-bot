@@ -12,6 +12,9 @@ exports.name = 'remove_track'
  */
 exports.run = (client, message, args) => {
 
+    const trackNumber = (!isInteraction(message)) ? args[0][0] - 1 : message.options.get("position").value - 1;
+    const queue = client.player.nodes.get(message.guildId);
+
     if (voiceChecks(message, queue) === false) { return; }
     if (queueChecks(message, queue) === false) { return; }
 
@@ -30,11 +33,8 @@ exports.run = (client, message, args) => {
         return void message.reply({content: `❌ | ${trackNumber + 1} is past the end of the queue!`, ephemeral: true});
     }
 
-    const trackNumber = (!isInteraction(message)) ? args[0][0] - 1 : message.options.get("position").value - 1;
-    const queue = client.player.getQueue(message.guildId);
-
     try {
-        const track = queue.remove(queue.tracks[trackNumber]);
+        const track = queue.node.remove(queue.tracks.toArray()[trackNumber]);
         return void message.reply({content: `✅ | Removed track: **${track.title}** (${track.duration})`});
     } catch (error) {
         console.error(error);
