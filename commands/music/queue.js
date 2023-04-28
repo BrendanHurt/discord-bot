@@ -1,6 +1,7 @@
 const voiceChecks = require("../../util/music/validateVoiceChannel");
 const queueChecks = require("../../util/music/validateQueuePlaying");
 const isInteraction = require("../../util/isInteraction");
+const { useMasterPlayer } = require("discord-player");
 
 /**
  * Creates an array of stings that hold the name and track length of all the tracks in
@@ -49,7 +50,8 @@ const isInteraction = require("../../util/isInteraction");
  * @returns {Void}
  */
 exports.run = async (client, message) => {
-    const queue = client.player.nodes.get(message.guildId);
+    const player = useMasterPlayer();
+    const queue = player.nodes.get(message.guildId);
 
     if (voiceChecks(message, queue) === false) { return; }
     if (queueChecks(message, queue) === false) { return; }

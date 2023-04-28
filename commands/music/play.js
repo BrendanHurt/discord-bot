@@ -1,4 +1,4 @@
-const { QueryType } = require('discord-player');
+const { QueryType, useMasterPlayer } = require('discord-player');
 const voiceChecks = require("../../util/music/validateVoiceChannel");
 const isInteraction = require("../../util/isInteraction");
 
@@ -20,7 +20,7 @@ exports.run = async (client, message, args) => {
 
     const commandArgs = playArgHandler(message, args);
     const channel = message.member.voice.channel;
-    const player = client.player;
+    const player = useMasterPlayer();
 
     /////////////////////////////////////////////////////////////////////////
     //searching for a track

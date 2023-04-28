@@ -1,6 +1,7 @@
 const voiceChecks = require("../../util/music/validateVoiceChannel");
 const queueChecks = require("../../util/music/validateQueuePlaying");
 const isInteraction = require("../../util/isInteraction");
+const { useMasterPlayer } = require("discord-player");
 
 exports.name = 'remove_track'
 
@@ -11,9 +12,9 @@ exports.name = 'remove_track'
  * @param {*} args The array of arguments, should hold one int
  */
 exports.run = (client, message, args) => {
-
     const trackNumber = (!isInteraction(message)) ? args[0][0] - 1 : message.options.get("position").value - 1;
-    const queue = client.player.nodes.get(message.guildId);
+    const player = useMasterPlayer();
+    const queue = player.nodes.get(message.guildId);
 
     if (voiceChecks(message, queue) === false) { return; }
     if (queueChecks(message, queue) === false) { return; }

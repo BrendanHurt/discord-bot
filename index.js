@@ -11,8 +11,8 @@ const client = new Client({
     ]
 });
 
-const player = new Player(client);
-client.player = player;
+const player = Player.singleton(client);
+//client.player = player;
 
 const commandCategories = ["music", "moderation", "config"];
 client.commands = new Collection();

@@ -1,9 +1,11 @@
+const { useMasterPlayer } = require("discord-player");
 const voiceChecks = require("../../util/music/validateVoiceChannel");
 
 exports.name = 'stop'
 
 exports.run = (client, message, args) => {
-    const queue = client.player.nodes.get(message.guildId);
+    const player = useMasterPlayer();
+    const queue = player.nodes.get(message.guildId);
     
     if (voiceChecks(message, queue) === false) { return; }
 
