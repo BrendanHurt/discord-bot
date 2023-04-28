@@ -13,7 +13,6 @@ const client = new Client({
 
 const player = new Player(client);
 client.player = player;
-client.embedMessage = undefined; //find a better way to do this later
 
 const commandCategories = ["music", "moderation", "config"];
 client.commands = new Collection();
@@ -24,7 +23,7 @@ for (const category of commandCategories) {
     require("./util/commandLoader")(client, client.interactionCommands, "./commands/" + category);
 }
 
-const eventHandler = require('./util/eventHandler')(client);
+const eventHandler = require('./events/handlers/eventHandler')(client);
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -43,18 +42,7 @@ process.on('unhandledRejection', error => {
 
 //////////////////////////////////////////////////////////////////////
 //discord player stuff, move later
-const { EmbedBuilder } = require("discord.js");
-function createPlayerEmbed(track) {
-    const playerEmbed = new EmbedBuilder()
-        .setColor(0x0099FF)
-        .setTitle('Music Player')
-        .setDescription('Playing requested music, use !play or /play to request a song or playlist!')
-        .setThumbnail(track.thumbnail)
-        .addFields({name: 'Currently playing: ', value: track.title, inline: true})
-        .addFields({name: 'Track Length:', value: track.duration, inline: true});
 
-    return playerEmbed;
-}
 
 player.events.on('error', (queue, error) => {
     console.log(`[${queue.guild.name}] emitted error:\n${error}`);
@@ -62,25 +50,21 @@ player.events.on('error', (queue, error) => {
 player.events.on('playerError', (queue, error, track) => {
     console.log(`[${queue.guild.name}] emitted ${error}`);
 });
-
+//moving this later
+const createPlayerEmbed = require(`./embeds/createPlayerEmbed`);
 player.events.on('playerStart', (queue, track) => {
     queue.metadata.channel.send({embeds: [createPlayerEmbed(track)]});
-    /*if (!client.embedMessage) {
-        client.embedMessage = await queue.metadata.send({embeds: [createPlayerEmbed(track)]});
-    } else {
-        client.embedMessage.edit({embeds: [createPlayerEmbed(track)]});
-    }*/
 });
 player.events.on('trackEnd', (queue, track) => {
     queue.metadata.channel.send(`✅ | ${track.title} finished playing!`);
 });
 
-/*player.on('audioTrackAdd', (queue, track) => {
-    queue.metadata.send(`🎶 | Added **${track.title}** to the queue`);
+player.events.on('audioTrackAdd', (queue, track) => {
+    queue.metadata.channel.send(`🎶 | Added **${track.title}** to the queue`);
 });
-player.on('audioTracksAdd', (queue, track) => {
-    queue.metadata.send('Playlist added to the queue!');
-});*/
+player.events.on('audioTracksAdd', (queue, tracks) => {
+    queue.metadata.channel.send('Playlist added to the queue!');
+});
 
 player.events.on(`playerSkip`, (queue, track) => {
     queue.metadata.channel.send(`Skipping track: ${track.title}`);
