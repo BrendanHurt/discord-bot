@@ -2,6 +2,6 @@ ToDoList.txt
 config.json
 package-lock.json
 package.json
-process.env
+.env
 /commands/easterEggs/
 /node_modules/
