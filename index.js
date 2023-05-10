@@ -13,7 +13,7 @@ const client = new Client({
 
 const player = Player.singleton(client);
 
-const commandCategories = ["music", "moderation", "config"];
+const commandCategories = ["music", "config"];
 client.commands = new Collection();
 client.interactionCommands = new Collection();
 //load the commands into the collections
